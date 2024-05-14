@@ -1,0 +1,146 @@
+{% extends 'base.html'%} 
+{% block title %}Tài khoản {% endblock title %} 
+{% block body %}
+<h1 class="text-center">Tài khoản</h1>
+<div class="container mt-2">
+  {% for message in messages%}
+  <div
+    class="alert alert-{{message.tags}} alert-dismissible fade show"
+    role="alert"
+  >
+    <strong>{{message}}</strong>
+    <button
+      type="button"
+      class="btn-close"
+      data-bs-dismiss="alert"
+      aria-label="close"
+    ></button>
+  </div>
+  {% endfor %}
+  <div class="container">
+    <h1>Đơn hàng của tôi</h1>
+    <table class="table table-danger table-striped">
+      <thead>
+        <tr>
+          <th scope="col">Mã đơn</th>
+          <th scope="col">Họ tên</th>
+          <th scope="col">Tên hàng</th>
+          <th scope="col">Tổng tiền</th>
+          <th scope="col">Tình trạng thanh toán</th>
+          <th scope="col">Địa chỉ</th>
+          <th scope="col">Số điện thoại</th>
+          <th scope="col">Ngày đặt hàng</th>
+          <th scope="col">Tình trạng giao hàng</th>
+
+        </tr>
+      </thead>
+      <tbody>
+          {% for i in items %}
+          <tr>
+             <th scope="row">{{i.oid}}</th>
+             <td>{{i.name}}</td>
+             <td>{{i.items_json}}</td>
+             <td>{{i.amount}}</td>
+             <td>{{i.paymentstatus}}</td>
+             <td>{{i.address}}</td>
+             <td>{{i.phone}}</td>
+             {% for j in status %}
+             <td>{{j.Timestamp}}</td>
+             <td>{{j.update_desc}}</td>
+             {% endfor %}
+           </tr>
+          {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script
+  src="https://code.jquery.com/jquery-3.3.1.js"
+  integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+  crossorigin="anonymous"
+></script>
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"
+  integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut"
+  crossorigin="anonymous"
+></script>
+<script
+  src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"
+  integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k"
+  crossorigin="anonymous"
+></script>
+<script>
+  function getUserResponse(){
+    var userText = $('#textInput').val()
+    var userHTML = "<p class='userText'>Toi:<span>"+userText+"</span></p>"
+    $('#textInput').val("")
+    $('#chatbot').append(userHTML);
+    $.get('/getResponse',{userMsg:userText}).done(function(data){
+       var returnMsg = "<p class='boxText'>Chatbot: <span>"+data+"</span></p>"
+       $('#chatbot').append(returnMsg);
+       
+  })
+}
+  $('#buttonInput').click(function(){
+    getUserResponse();
+  })
+  
+  var cart={}
+  cart = JSON.parse(localStorage.getItem('cart'))
+  updateCart(cart);
+
+  // Thêm model hiển thị giỏ hàng
+
+  $('#popcart').popover();
+
+  // Hàm câp nhập model hiển thị giỏ hàng
+  function updatePopover(cart) {
+      
+      var popStr = "";
+      var popStr = popStr + "<h5> Giỏ hàng của bạn </h5> <div class='mx-2 my-2'>";
+      var i = 1;
+      for (var item in cart) {
+        popStr = popStr + "<b>" + i + "</b>. ";
+        popStr = popStr +cart[item][1]+ "..."+cart[item][0] + "</b>"+ "Qty"  + '<br>';
+      }
+      popStr = popStr + "</div> <a href='/checkout'><button class='btn btn-success' id='clearCart'>Thanh toán</button></a>  <button class='btn btn-dark' onclick='clearCart()' id='clearCart'>Xóa</button>"
+      document.getElementById('popcart').setAttribute('data-content', popStr);
+      $('#popcart').popover('show');
+      document.getElementById("popcart").click();
+  }
+
+  // Hàm xóa giỏ hàng
+  function clearCart() {
+      cart = JSON.parse(localStorage.getItem('cart'));
+      for (var item in cart) {
+          document.getElementById('div' + item).innerHTML = '<button id="' + item + '" class="btn btn-danger cart">Thêm giỏ hàng <i class="fa-solid fa-cart-shopping"></i></button>'
+      }
+      localStorage.clear();
+      cart = {};
+      updateCart(cart);
+      
+     let clear= document.getElementById("popcart").click();
+     document.getElementById("popcart").click();
+    
+  }
+  //Hàm câp nhập giỏ hàng
+  function updateCart(cart) {
+     console.log("update",cart)
+     var sum = 0;
+     for (var item in cart) {
+      sum = sum + cart[item][0];
+  }
+  document.getElementById('cart').innerHTML = sum;
+     localStorage.setItem('cart', JSON.stringify(cart));
+     updatePopover(cart);
+     document.getElementById("popcart").click();
+  }
+
+  cart_order={}
+  for (var item in items){
+  cart_order=item.items_json
+  }
+  $('#items').append(items.email);
+</script>
+{% endblock body %}
